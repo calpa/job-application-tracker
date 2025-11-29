@@ -62,6 +62,8 @@ const Popup = () => {
   const [appliedAt, setAppliedAt] = useState(getTodayISO());
   const [note, setNote] = useState('');
   const [activeTab, setActiveTab] = useState<'current' | 'all'>('current');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortMode, setSortMode] = useState<'date' | 'companyAsc' | 'companyDesc'>('date');
 
   const currentApplication = useMemo(
     () => applications.find(app => app.url === currentUrl),
@@ -205,14 +207,39 @@ const Popup = () => {
     setApplications(next);
   };
 
-  const sortedApplications = useMemo(
-    () =>
-      [...applications].sort((a, b) => {
+  const sortedApplications = useMemo(() => {
+    const base = [...applications];
+
+    if (sortMode === 'date') {
+      return base.sort((a, b) => {
         if (a.appliedAt === b.appliedAt) return 0;
         return a.appliedAt < b.appliedAt ? 1 : -1;
-      }),
-    [applications],
-  );
+      });
+    }
+
+    const getKey = (app: JobApplication) => (app.company || app.position || '').toLowerCase();
+
+    base.sort((a, b) => {
+      const ka = getKey(a);
+      const kb = getKey(b);
+      if (ka === kb) return 0;
+      const cmp = ka < kb ? -1 : 1;
+      return sortMode === 'companyAsc' ? cmp : -cmp;
+    });
+
+    return base;
+  }, [applications, sortMode]);
+
+  const filteredApplications = useMemo(() => {
+    const term = searchQuery.trim().toLowerCase();
+    if (!term) return sortedApplications;
+
+    return sortedApplications.filter(app => {
+      const company = app.company?.toLowerCase() ?? '';
+      const position = app.position?.toLowerCase() ?? '';
+      return company.includes(term) || position.includes(term);
+    });
+  }, [sortedApplications, searchQuery]);
 
   const today = getTodayISO();
 
@@ -279,12 +306,33 @@ const Popup = () => {
         )}
 
         {activeTab === 'all' && (
-          <ApplicationList
-            applications={sortedApplications}
-            isLight={isLight}
-            onOpen={openApplicationUrl}
-            onDelete={handleDelete}
-          />
+          <>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type="text"
+                className="flex-1 rounded-full border border-slate-300 px-3 py-1 text-xs text-black"
+                placeholder="Search by company or position..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+
+              <select
+                className="rounded-full border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-700"
+                value={sortMode}
+                onChange={e => setSortMode(e.target.value as 'date' | 'companyAsc' | 'companyDesc')}>
+                <option value="date">Date</option>
+                <option value="companyAsc">A–Z</option>
+                <option value="companyDesc">Z–A</option>
+              </select>
+            </div>
+
+            <ApplicationList
+              applications={filteredApplications}
+              isLight={isLight}
+              onOpen={openApplicationUrl}
+              onDelete={handleDelete}
+            />
+          </>
         )}
       </div>
     </div>
