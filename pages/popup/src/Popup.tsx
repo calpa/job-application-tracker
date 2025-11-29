@@ -59,6 +59,7 @@ const Popup = () => {
   const [status, setStatus] = useState<JobStatus>('applied');
   const [appliedAt, setAppliedAt] = useState(getTodayISO());
   const [note, setNote] = useState('');
+  const [activeTab, setActiveTab] = useState<'current' | 'all'>('current');
 
   const currentApplication = useMemo(
     () => applications.find(app => app.url === currentUrl),
@@ -197,33 +198,78 @@ const Popup = () => {
     [applications],
   );
 
+  const today = getTodayISO();
+
+  const todayCount = useMemo(() => applications.filter(app => app.appliedAt === today).length, [applications, today]);
+
+  const totalCount = applications.length;
+
   return (
     <div className={cn('App', isLight ? 'bg-slate-50' : 'bg-gray-800')}>
-      <div className={cn('mt-3 w-full max-w-xs space-y-3 text-left')}>
-        <CurrentJobCard pageTitle={pageTitle} currentUrl={currentUrl} currentApplication={currentApplication} />
+      <div className={cn('mx-auto mt-3 h-full w-full max-w-md space-y-3 px-3 pb-3 text-left')}>
+        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs shadow-sm">
+          <div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Today</div>
+            <div className="text-lg font-semibold text-slate-900">{todayCount}</div>
+          </div>
+          <div className="h-8 w-px bg-slate-200" />
+          <div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Total</div>
+            <div className="text-lg font-semibold text-slate-900">{totalCount}</div>
+          </div>
+        </div>
 
-        <ApplicationForm
-          company={company}
-          position={position}
-          appliedAt={appliedAt}
-          note={note}
-          isSaving={isSaving}
-          error={error}
-          hasCurrentApplication={Boolean(currentApplication)}
-          isLight={isLight}
-          onChangeCompany={setCompany}
-          onChangePosition={setPosition}
-          onChangeAppliedAt={setAppliedAt}
-          onChangeNote={setNote}
-          onSubmit={handleSubmit}
-        />
+        <div className="inline-flex rounded-full bg-slate-200 p-1 text-xs">
+          <button
+            type="button"
+            className={cn(
+              'rounded-full px-3 py-1 font-medium transition-colors',
+              activeTab === 'current' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900',
+            )}
+            onClick={() => setActiveTab('current')}>
+            This page
+          </button>
+          <button
+            type="button"
+            className={cn(
+              'rounded-full px-3 py-1 font-medium transition-colors',
+              activeTab === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900',
+            )}
+            onClick={() => setActiveTab('all')}>
+            All applications
+          </button>
+        </div>
 
-        <ApplicationList
-          applications={sortedApplications}
-          isLight={isLight}
-          onOpen={openApplicationUrl}
-          onDelete={handleDelete}
-        />
+        {activeTab === 'current' && (
+          <div className="space-y-3">
+            <CurrentJobCard pageTitle={pageTitle} currentUrl={currentUrl} currentApplication={currentApplication} />
+
+            <ApplicationForm
+              company={company}
+              position={position}
+              appliedAt={appliedAt}
+              note={note}
+              isSaving={isSaving}
+              error={error}
+              hasCurrentApplication={Boolean(currentApplication)}
+              isLight={isLight}
+              onChangeCompany={setCompany}
+              onChangePosition={setPosition}
+              onChangeAppliedAt={setAppliedAt}
+              onChangeNote={setNote}
+              onSubmit={handleSubmit}
+            />
+          </div>
+        )}
+
+        {activeTab === 'all' && (
+          <ApplicationList
+            applications={sortedApplications}
+            isLight={isLight}
+            onOpen={openApplicationUrl}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </div>
   );
