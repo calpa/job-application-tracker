@@ -263,6 +263,21 @@ const Popup = () => {
 
   const totalCount = applications.length;
 
+  const hasChanges = useMemo(() => {
+    if (!currentApplication) return true;
+
+    const normalizedNote = (value: string | undefined | null) => (value ?? '').trim();
+
+    return (
+      (jobId || '').trim() !== (currentApplication.id || '').trim() ||
+      (company || '').trim() !== (currentApplication.company || '').trim() ||
+      (position || '').trim() !== (currentApplication.position || '').trim() ||
+      status !== currentApplication.status ||
+      (appliedAt || '').trim() !== (currentApplication.appliedAt || '').trim() ||
+      normalizedNote(note) !== normalizedNote(currentApplication.note)
+    );
+  }, [currentApplication, jobId, company, position, status, appliedAt, note]);
+
   return (
     <div className={cn('App', isLight ? 'bg-slate-50' : 'bg-gray-800')}>
       <div className={cn('mx-auto mt-3 h-full w-full max-w-md space-y-3 px-3 pb-3 text-left')}>
@@ -313,6 +328,7 @@ const Popup = () => {
               error={error}
               hasCurrentApplication={Boolean(currentApplication)}
               isLight={isLight}
+              disableSubmit={Boolean(currentApplication) && !hasChanges}
               onChangeJobId={setJobId}
               onChangeCompany={setCompany}
               onChangePosition={setPosition}

@@ -11,6 +11,7 @@ export type ApplicationFormProps = {
   error: string | null;
   hasCurrentApplication: boolean;
   isLight: boolean;
+  disableSubmit?: boolean;
   onChangeJobId: (value: string) => void;
   onChangeCompany: (value: string) => void;
   onChangePosition: (value: string) => void;
@@ -29,6 +30,7 @@ export const ApplicationForm: FC<ApplicationFormProps> = ({
   error,
   hasCurrentApplication,
   isLight,
+  disableSubmit,
   onChangeJobId,
   onChangeCompany,
   onChangePosition,
@@ -107,13 +109,16 @@ export const ApplicationForm: FC<ApplicationFormProps> = ({
 
     <button
       type="submit"
-      disabled={isSaving}
+      disabled={isSaving || disableSubmit}
       className={cn(
         'mt-1 w-full rounded px-3 py-1 text-xs font-semibold shadow',
-        isLight ? 'bg-blue-500 text-white' : 'bg-blue-400 text-gray-900',
-        isSaving && 'cursor-not-allowed opacity-70',
+        isSaving || disableSubmit
+          ? 'cursor-not-allowed bg-slate-300 text-slate-500'
+          : isLight
+            ? 'bg-blue-500 text-white'
+            : 'bg-blue-400 text-gray-900',
       )}>
-      {isSaving ? 'Saving...' : hasCurrentApplication ? 'Update this page record' : 'Add record for this page'}
+      {isSaving ? 'Saving...' : hasCurrentApplication ? 'Update' : 'Add record for this page'}
     </button>
   </form>
 );
