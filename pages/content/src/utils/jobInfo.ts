@@ -5,4 +5,5 @@ export type JobInfo = {
   position?: string;
   workStyle?: WorkStyle;
   description?: string;
+  appliedAt?: string;
 };

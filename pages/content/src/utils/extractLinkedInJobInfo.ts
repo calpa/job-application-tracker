@@ -97,6 +97,98 @@ const extractDescription = (): string | undefined => {
 };
 
 /**
+ * Parses LinkedIn's "Applied X ago" style text into an ISO date string (YYYY-MM-DD).
+ *
+ * Examples of supported formats:
+ * - "Applied 2 seconds ago"
+ * - "Applied 3 minutes ago"
+ * - "Applied 5 hours ago"
+ * - "Applied 2 days ago"
+ * - "Applied 1 week ago"
+ * - "Applied today"
+ * - "Applied yesterday"
+ *
+ * @param text The raw applied text from LinkedIn.
+ * @returns ISO date string (YYYY-MM-DD) or `undefined` if it cannot be parsed.
+ */
+const parseAppliedAtTextToISO = (text: string): string | undefined => {
+  const normalized = text.trim().toLowerCase();
+  if (!normalized.startsWith('applied')) return undefined;
+
+  const today = new Date();
+
+  const remainder = normalized.replace(/^applied\s*/, '').trim();
+
+  if (remainder.startsWith('today')) {
+    return today.toISOString().slice(0, 10);
+  }
+
+  if (remainder.startsWith('yesterday')) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+  }
+
+  const match = remainder.match(/^(\d+)\s+(second|seconds|minute|minutes|hour|hours|day|days|week|weeks)\s+ago/);
+  if (!match) {
+    return undefined;
+  }
+
+  const value = Number.parseInt(match[1] ?? '', 10);
+  if (!Number.isFinite(value) || value < 0) {
+    return undefined;
+  }
+
+  const unit = match[2];
+  let daysDelta = 0;
+
+  if (
+    unit === 'second' ||
+    unit === 'seconds' ||
+    unit === 'minute' ||
+    unit === 'minutes' ||
+    unit === 'hour' ||
+    unit === 'hours'
+  ) {
+    daysDelta = 0;
+  } else if (unit === 'day' || unit === 'days') {
+    daysDelta = value;
+  } else if (unit === 'week' || unit === 'weeks') {
+    daysDelta = value * 7;
+  }
+
+  const d = new Date(today);
+  d.setDate(d.getDate() - daysDelta);
+  return d.toISOString().slice(0, 10);
+};
+
+/**
+ * Attempts to locate the LinkedIn "Applied X ago" element and convert it to an ISO date.
+ *
+ * The exact DOM structure may change over time, so this uses a text-based search over
+ * common inline elements.
+ *
+ * @returns ISO date string (YYYY-MM-DD) or `undefined` if it cannot be determined.
+ */
+const extractAppliedAt = (): string | undefined => {
+  const candidates = Array.from(document.querySelectorAll('span, time, div')) as HTMLElement[];
+
+  for (const el of candidates) {
+    const raw = el.textContent?.trim();
+    if (!raw) continue;
+
+    if (/^Applied\s+/i.test(raw)) {
+      const parsed = parseAppliedAtTextToISO(raw);
+      if (parsed) {
+        return parsed;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+/**
  * Extracts structured job information from the current LinkedIn job page.
  *
  * This function reads the DOM of the active LinkedIn job posting tab and attempts to
@@ -126,6 +218,11 @@ export const extractLinkedInJobInfo = (): JobInfo => {
   const description = extractDescription();
   if (description) {
     result.description = description;
+  }
+
+  const appliedAt = extractAppliedAt();
+  if (appliedAt) {
+    result.appliedAt = appliedAt;
   }
 
   return result;

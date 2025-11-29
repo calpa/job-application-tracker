@@ -34,6 +34,7 @@ type LinkedInJobInfoMessageResponse = {
     position?: string;
     workStyle?: 'onsite' | 'remote' | 'hybrid';
     description?: string;
+    appliedAt?: string;
   };
 };
 
@@ -94,7 +95,13 @@ const Popup = () => {
                 return;
               }
 
-              const { company: liCompany, position: liPosition, workStyle, description } = response.info;
+              const {
+                company: liCompany,
+                position: liPosition,
+                workStyle,
+                description,
+                appliedAt: liAppliedAt,
+              } = response.info;
 
               if (liCompany) {
                 setCompany(liCompany);
@@ -102,6 +109,10 @@ const Popup = () => {
 
               if (!position && liPosition) {
                 setPosition(liPosition);
+              }
+
+              if (!currentApplication && liAppliedAt) {
+                setAppliedAt(liAppliedAt);
               }
 
               if (!note) {
