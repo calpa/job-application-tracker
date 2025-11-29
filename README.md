@@ -1,5 +1,11 @@
 # Job Application Tracker Extension
 
+[![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)](./package.json)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
+
 A Chrome/Firefox extension that helps you **track your job applications directly from the job page**.
 
 Built with React, TypeScript, Vite, and the `chrome-extension-boilerplate-react-vite` starter.
