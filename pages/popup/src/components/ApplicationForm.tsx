@@ -2,6 +2,7 @@ import { cn } from '@extension/ui';
 import type { FC, FormEvent } from 'react';
 
 export type ApplicationFormProps = {
+  jobId: string;
   company: string;
   position: string;
   appliedAt: string;
@@ -10,6 +11,7 @@ export type ApplicationFormProps = {
   error: string | null;
   hasCurrentApplication: boolean;
   isLight: boolean;
+  onChangeJobId: (value: string) => void;
   onChangeCompany: (value: string) => void;
   onChangePosition: (value: string) => void;
   onChangeAppliedAt: (value: string) => void;
@@ -18,6 +20,7 @@ export type ApplicationFormProps = {
 };
 
 export const ApplicationForm: FC<ApplicationFormProps> = ({
+  jobId,
   company,
   position,
   appliedAt,
@@ -26,6 +29,7 @@ export const ApplicationForm: FC<ApplicationFormProps> = ({
   error,
   hasCurrentApplication,
   isLight,
+  onChangeJobId,
   onChangeCompany,
   onChangePosition,
   onChangeAppliedAt,
@@ -33,6 +37,19 @@ export const ApplicationForm: FC<ApplicationFormProps> = ({
   onSubmit,
 }) => (
   <form onSubmit={onSubmit} className="mt-2 space-y-2 text-xs">
+    <div>
+      <label className="mb-1 block font-medium" htmlFor="job-id">
+        Job ID
+      </label>
+      <input
+        id="job-id"
+        className="w-full rounded border border-slate-300 px-2 py-1 text-xs text-black"
+        value={jobId}
+        onChange={e => onChangeJobId(e.target.value)}
+        placeholder="Job identifier (e.g. LinkedIn currentJobId)"
+      />
+    </div>
+
     <div>
       <label className="mb-1 block font-medium" htmlFor="job-company">
         Company

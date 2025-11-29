@@ -11,10 +11,6 @@ export type ApplicationListProps = {
 
 export const ApplicationList: FC<ApplicationListProps> = ({ applications, isLight, onOpen, onDelete }) => (
   <div className="mt-3 h-full w-full border-t border-slate-300 pt-2 text-xs">
-    <div className="mb-1 flex items-center justify-between">
-      <span className="font-semibold">All applications ({applications.length})</span>
-    </div>
-
     <div className="h-2/3 overflow-y-scroll">
       {applications.length === 0 ? (
         <div className="text-[11px] text-slate-500">No applications yet...</div>

@@ -2,6 +2,7 @@ import '@src/Popup.css';
 import { ApplicationForm } from './components/ApplicationForm';
 import { ApplicationList } from './components/ApplicationList';
 import { CurrentJobCard } from './components/CurrentJobCard';
+import { getLinkedInJobIdFromUrl } from './getLinkedInJobIdFromUrl';
 import { getTodayISO, loadApplications, saveApplications } from './jobTypes';
 import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import { exampleThemeStorage } from '@extension/storage';
@@ -30,6 +31,7 @@ const inferCompanyFromTitle = (title: string): string => {
 type LinkedInJobInfoMessageResponse = {
   ok: boolean;
   info?: {
+    id?: string;
     company?: string;
     position?: string;
     workStyle?: 'onsite' | 'remote' | 'hybrid';
@@ -56,6 +58,7 @@ const Popup = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [jobId, setJobId] = useState('');
   const [company, setCompany] = useState('');
   const [position, setPosition] = useState('');
   const [status, setStatus] = useState<JobStatus>('applied');
@@ -98,12 +101,17 @@ const Popup = () => {
               }
 
               const {
+                id,
                 company: liCompany,
                 position: liPosition,
                 workStyle,
                 description,
                 appliedAt: liAppliedAt,
               } = response.info;
+
+              if (!currentApplication && id) {
+                setJobId(id);
+              }
 
               if (liCompany) {
                 setCompany(liCompany);
@@ -140,6 +148,7 @@ const Popup = () => {
   useEffect(() => {
     if (!currentApplication) return;
 
+    setJobId(currentApplication.id);
     setCompany(currentApplication.company);
     setPosition(currentApplication.position);
     setStatus(currentApplication.status);
@@ -172,8 +181,15 @@ const Popup = () => {
       const next: JobApplication[] = (() => {
         const existingIndex = applications.findIndex(app => app.url === currentUrl);
 
+        const linkedInJobId = getLinkedInJobIdFromUrl(currentUrl);
+
+        const manualId = jobId.trim() || undefined;
+
         const base: JobApplication = {
-          id: existingIndex >= 0 ? applications[existingIndex].id : `${Date.now()}`,
+          id:
+            existingIndex >= 0
+              ? (manualId ?? applications[existingIndex].id)
+              : (manualId ?? linkedInJobId ?? `${Date.now()}`),
           url: currentUrl,
           company: company.trim() || pageTitle,
           position: position.trim(),
@@ -288,6 +304,7 @@ const Popup = () => {
             <CurrentJobCard pageTitle={pageTitle} currentUrl={currentUrl} currentApplication={currentApplication} />
 
             <ApplicationForm
+              jobId={jobId}
               company={company}
               position={position}
               appliedAt={appliedAt}
@@ -296,6 +313,7 @@ const Popup = () => {
               error={error}
               hasCurrentApplication={Boolean(currentApplication)}
               isLight={isLight}
+              onChangeJobId={setJobId}
               onChangeCompany={setCompany}
               onChangePosition={setPosition}
               onChangeAppliedAt={setAppliedAt}

@@ -77,6 +77,25 @@ const extractWorkStyle = (): JobInfo['workStyle'] | undefined => {
 };
 
 /**
+ * Extracts the LinkedIn job identifier from the current page URL, if present.
+ *
+ * Typically this is provided as the `currentJobId` query parameter.
+ */
+const extractJobIdFromUrl = (): string | undefined => {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.hostname.includes('linkedin.com')) {
+      return undefined;
+    }
+
+    const jobId = url.searchParams.get('currentJobId');
+    return jobId || undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
  * Extracts the job description text from the current LinkedIn job page.
  *
  * @returns The normalized job description text, or `undefined` if it cannot be found.
@@ -199,6 +218,11 @@ const extractAppliedAt = (): string | undefined => {
  */
 export const extractLinkedInJobInfo = (): JobInfo => {
   const result: JobInfo = {};
+
+  const id = extractJobIdFromUrl();
+  if (id) {
+    result.id = id;
+  }
 
   const position = extractTitle();
   if (position) {
