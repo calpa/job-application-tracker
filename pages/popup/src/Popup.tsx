@@ -246,16 +246,33 @@ const Popup = () => {
     return base;
   }, [applications, sortMode]);
 
+  const currentJobId = useMemo(() => getLinkedInJobIdFromUrl(currentUrl) ?? '', [currentUrl]);
+
   const filteredApplications = useMemo(() => {
     const term = searchQuery.trim().toLowerCase();
-    if (!term) return sortedApplications;
+    const base = !term
+      ? sortedApplications
+      : sortedApplications.filter(app => {
+          const company = app.company?.toLowerCase() ?? '';
+          const position = app.position?.toLowerCase() ?? '';
+          return company.includes(term) || position.includes(term);
+        });
 
-    return sortedApplications.filter(app => {
-      const company = app.company?.toLowerCase() ?? '';
-      const position = app.position?.toLowerCase() ?? '';
-      return company.includes(term) || position.includes(term);
-    });
-  }, [sortedApplications, searchQuery]);
+    if (!currentJobId) return base;
+
+    const pinned: JobApplication[] = [];
+    const others: JobApplication[] = [];
+
+    for (const app of base) {
+      if (app.id === currentJobId) {
+        pinned.push(app);
+      } else {
+        others.push(app);
+      }
+    }
+
+    return [...pinned, ...others];
+  }, [sortedApplications, searchQuery, currentJobId]);
 
   const today = getTodayISO();
 
@@ -363,6 +380,7 @@ const Popup = () => {
             <ApplicationList
               applications={filteredApplications}
               isLight={isLight}
+              currentJobId={currentJobId}
               onOpen={openApplicationUrl}
               onDelete={handleDelete}
             />

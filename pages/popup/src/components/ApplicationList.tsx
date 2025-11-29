@@ -5,11 +5,18 @@ import type { FC } from 'react';
 export type ApplicationListProps = {
   applications: JobApplication[];
   isLight: boolean;
+  currentJobId?: string;
   onOpen: (url: string) => void;
   onDelete: (id: string) => void;
 };
 
-export const ApplicationList: FC<ApplicationListProps> = ({ applications, isLight, onOpen, onDelete }) => (
+export const ApplicationList: FC<ApplicationListProps> = ({
+  applications,
+  isLight,
+  currentJobId,
+  onOpen,
+  onDelete,
+}) => (
   <div className="mt-3 h-full w-full border-t border-slate-300 pt-2 text-xs">
     <div className="h-2/3 overflow-y-scroll">
       {applications.length === 0 ? (
@@ -22,6 +29,7 @@ export const ApplicationList: FC<ApplicationListProps> = ({ applications, isLigh
               className={cn(
                 'rounded border px-2 py-1',
                 isLight ? 'border-slate-300 bg-white' : 'border-slate-600 bg-gray-700',
+                currentJobId && app.id === currentJobId && 'border-yellow-300 bg-yellow-100',
               )}>
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0 flex-1">
