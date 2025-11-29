@@ -4,4 +4,5 @@ export type JobInfo = {
   company?: string;
   position?: string;
   workStyle?: WorkStyle;
+  description?: string;
 };

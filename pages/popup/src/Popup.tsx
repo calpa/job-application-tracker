@@ -33,6 +33,7 @@ type LinkedInJobInfoMessageResponse = {
     company?: string;
     position?: string;
     workStyle?: 'onsite' | 'remote' | 'hybrid';
+    description?: string;
   };
 };
 
@@ -93,7 +94,7 @@ const Popup = () => {
                 return;
               }
 
-              const { company: liCompany, position: liPosition, workStyle } = response.info;
+              const { company: liCompany, position: liPosition, workStyle, description } = response.info;
 
               if (liCompany) {
                 setCompany(liCompany);
@@ -103,9 +104,13 @@ const Popup = () => {
                 setPosition(liPosition);
               }
 
-              if (workStyle && !note) {
-                const label = workStyle === 'remote' ? 'Remote' : workStyle === 'hybrid' ? 'Hybrid' : 'On-site';
-                setNote(prev => (prev ? prev : `Work style: ${label}`));
+              if (!note) {
+                if (description) {
+                  setNote(description);
+                } else if (workStyle) {
+                  const label = workStyle === 'remote' ? 'Remote' : workStyle === 'hybrid' ? 'Hybrid' : 'On-site';
+                  setNote(prev => (prev ? prev : `Work style: ${label}`));
+                }
               }
             },
           );
