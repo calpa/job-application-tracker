@@ -80,7 +80,10 @@ const Popup = () => {
           }
         }
 
-        if (tabInfo.id && tabInfo.url.includes('linkedin.com/jobs')) {
+        const isLinkedInJob = tabInfo.url.includes('linkedin.com/jobs');
+        const isGreenhouseJob = tabInfo.url.includes('job-boards.greenhouse.io');
+
+        if (tabInfo.id && (isLinkedInJob || isGreenhouseJob)) {
           chrome.tabs.sendMessage<LinkedInJobInfoMessage, LinkedInJobInfoMessageResponse>(
             tabInfo.id,
             { type: 'GET_LINKEDIN_JOB_INFO' },
