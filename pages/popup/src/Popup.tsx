@@ -209,6 +209,8 @@ const Popup = () => {
 
       await saveApplications(next);
       setApplications(next);
+
+      setActiveTab('all');
     } catch (_e) {
       setError('Failed to save application.');
       console.error(_e);

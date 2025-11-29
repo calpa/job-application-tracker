@@ -29,7 +29,7 @@ export const ApplicationList: FC<ApplicationListProps> = ({
               className={cn(
                 'rounded border px-2 py-1',
                 isLight ? 'border-slate-300 bg-white' : 'border-slate-600 bg-gray-700',
-                currentJobId && app.id === currentJobId && 'border-yellow-300 bg-yellow-100',
+                currentJobId && app.id === currentJobId && 'border-green-300 bg-green-100',
               )}>
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0 flex-1">
